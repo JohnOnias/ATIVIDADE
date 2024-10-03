@@ -21,10 +21,36 @@ class Playlist:
             return self.head.prev is not None
 
     def insert_at_end(self, music: Music) -> None:
-        pass
+        newNode = Node(self.data)
+        if not self.head:
+            self.head = newNode
+        else: 
+            current = self.head
+            while current.next != self.head:
+                    current = current.next
+            current.next = newNode
+            newNode.prev = current
+            newNode.next = self.head
+            self.head.prev = newNode
+                    
 
-    def remove_at(self, index: int) -> None:
-        pass
+    def remove(self, music: Music) -> None:
+        newNode = Node(self.data)
+        current = newNode
+
+        while current.data.name != music.name:
+            previous = current
+            current = current.next
+            if current.data.name == music.name:
+                break
+        if current.data.name == music.nameÇ
+            previous.next = current.next
+        
+        else: 
+            print("Musica não encontrada!\n")
+            
+
+
 
     def move_music(self, from_pos: int, dest_pos: int) -> None:
         pass
