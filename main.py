@@ -9,32 +9,36 @@ class Node:
         self.data = data
         self.prev = None
         self.next = None
-
+      
 class Playlist:
     def __init__(self) -> None:
         self.head = None
         self.tail = None
+        self.size = 0 
 
-    def is_circular(self) -> bool:
-        if self.head is None:
-            return False
+    def is_circular(self, marcador):
+        if marcador == "yes":
+            self.tail.next = self.head
+            self.head.prev = self.tail
+            print("Lista circular ativada")
         else:
-            return self.head.prev is not None
+            self.head.prev is not None
+            print("Lista circular desativada")
+        
+        
 
-    def insert_at_end(self, music: Music) -> None:
+
+    def append(self, music: Music) -> None:
         newNode = Node(music)
         if self.head is None:
             self.head = self.tail = newNode
-            return
-        
-        current = self.tail
-        while current.next is not None:
-            current = current.next
+        else:
+            self.tail.next = newNode
+            newNode.prev = self.tail
+            self.tail = newNode
+        self.size += 1
 
-        current.next = newNode
-        newNode.prev = current
-        # self.tail.prev = newNode
-                    
+        
 
     def remove(self, name) -> None:
         current = self.head
@@ -49,33 +53,71 @@ class Playlist:
         current.next = temp
         current.next.prev = temp
         temp.prev = current
+        self.size = self.size-1
 
 
-    def move_music(self, from_pos: int, dest_pos: int) -> None:
-        pass
+    def __len__(self):
+        return self.size
+    
+
+
+    def move(self, index, item):
+        current = self.head
+        prev = None
+        while current is not None:
+            if current.data.name == item:
+                break
+            prev = current
+            current = current.next
+        else:
+            raise IndexError("List index out of range!")
+
+        if prev is not None:
+            prev.next = current.next
+        else:
+            self.head = current.next
+
+        temp = self.head
+        prev = None
+        for i in range(index):
+            if temp is None:
+                raise IndexError("List index out of range!")
+            prev = temp
+            temp = temp.next
+
+        if prev is not None:
+            prev.next = current
+        else:
+            self.head = current
+        current.next = temp
+
+
 
     def list_all(self) -> None:
         current = self.head
-
         while current is not None:
             print("----------MUSIC-----------")
             print(current.data.name)
             print(current.data.artist)
             print(current.data.duration)
-
             current = current.next
-            
-        pass
 
 
-list_playlist = Playlist()
 
-list_playlist.insert_at_end(Music("Borbulhas de Amor", "Fagner", "4:15"))
-list_playlist.insert_at_end(Music("Boate Azul", "Leno Brega", "3:20"))
-list_playlist.insert_at_end(Music("Seu amor me pegou", "Pablo Vittar", "2:30"))
-list_playlist.list_all()
 
-print("###########TENTANDO REMOVER#######################")
-list_playlist.remove("Boate Azul")
-list_playlist.list_all()
 
+
+lista = Playlist()
+
+lista.append(Music("Borbulhas de Amor", "Fagner", "4:15"))
+lista.append(Music("Boate Azul", "Leno Brega", "3:20"))
+lista.append(Music("Seu amor me pegou", "Pablo Vittar", "2:30"))
+lista.list_all()
+
+print("###########TENTANDO REMOVER #######################")
+lista.list_all()
+len(lista)
+print("###########TENTANDO MOVER #######################")
+lista.move(1, "Seu amor me pegou")
+lista.list_all()
+lista.is_circular("yes")
