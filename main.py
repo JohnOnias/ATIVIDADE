@@ -9,14 +9,20 @@ class Node:
         self.data = data
         self.prev = None
         self.next = None
-      
+
 class Playlist:
     def __init__(self) -> None:
         self.head = None
-        self.tail = None
-        self.size = 0 
+        self.size = 0
+    
 
-    def is_circular(self, marcador):
+    def is_circular(self):
+        if self.head is None:
+            return False
+
+        return self.head.prev == self.tail and self.tail.next == self.head
+
+    def set_circular(self, marcador):
         if marcador == "yes":
             self.tail.next = self.head
             self.head.prev = self.tail
@@ -31,35 +37,43 @@ class Playlist:
     def append(self, music: Music) -> None:
         newNode = Node(music)
         if self.head is None:
-            self.head = self.tail = newNode
+            self.head = newNode
         else:
-            self.tail.next = newNode
-            newNode.prev = self.tail
-            self.tail = newNode
+            tail = self.tail
+            tail.next = newNode
+            newNode.prev = tail.prev
         self.size += 1
 
         
 
     def remove(self, name) -> None:
         current = self.head
-        temp = None
-        while current is not None:
+        before = None
+        while current is not None and current.next != self.head:
             if current.data.name != name:
-                temp = current
+                before = current
                 current = current.next
-            break
+            else:
+                break
+    
+        if before:
+            before.next = current.next
+
+            # Caso de lista circular
+            if current == self.head:
+                self.head = current.next
+        else:
+            #Cabeça
+            self.head = current.next
+
+        if current.next:
+            current.next.prev = before
         
-        temp.next = current.next
-        current.next = temp
-        current.next.prev = temp
-        temp.prev = current
-        self.size = self.size-1
+        self.size = self.size - 1
 
 
     def __len__(self):
         return self.size
-    
-
 
     def move(self, index, item):
         current = self.head
@@ -91,20 +105,36 @@ class Playlist:
             self.head = current
         current.next = temp
 
-
+    def get_player(self):
+        return Player(self)
 
     def list_all(self) -> None:
+        tail = self.tail 
         current = self.head
         while current is not None:
             print("----------MUSIC-----------")
             print(current.data.name)
             print(current.data.artist)
             print(current.data.duration)
+
+            if current == tail:
+                break
+
             current = current.next
 
+class Player:
+    def __init__(self, playlist: Playlist):
+        self.playlist = playlist
+        self.current = playlist.head
 
+    def play(self):
+        if self.current == None:
+            print('You have reached the end of the playlist!')
+            return
+        
+        print(f'Playing {self.current.data.name} by {self.current.data.artist} ({self.current.data.duration})...')
 
-
+        self.current = self.current.next
 
 
 lista = Playlist()
@@ -114,10 +144,17 @@ lista.append(Music("Boate Azul", "Leno Brega", "3:20"))
 lista.append(Music("Seu amor me pegou", "Pablo Vittar", "2:30"))
 lista.list_all()
 
+lista.set_circular("yes")
+
+player = lista.get_player()
+
 print("###########TENTANDO REMOVER #######################")
+lista.remove("Boate Azul")
 lista.list_all()
 len(lista)
+
 print("###########TENTANDO MOVER #######################")
-lista.move(1, "Seu amor me pegou")
+lista.move(0, "Seu amor me pegou")
+lista.set_circular("yes")
+
 lista.list_all()
-lista.is_circular("yes")
